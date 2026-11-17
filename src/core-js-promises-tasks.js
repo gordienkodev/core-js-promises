@@ -80,9 +80,7 @@ function getFirstResolvedPromiseResult(promises) {
  * [promise3, promise4, promise6] => Promise rejected with 6
  */
 function getFirstPromiseResult(promises) {
-  return Promise.any(promises).then((value) => {
-    return value;
-  });
+  return Promise.race(promises);
 }
 
 /**
@@ -143,12 +141,17 @@ function getAllResult(promises) {
  * [promise1, promise4, promise3] => Promise.resolved('104030')
  * [promise1, promise4, promise3, promise2] => Promise.resolved('10403020')
  */
-function queuPromises(promises) {
-  return promises.reduce(async (process, promise) => {
-    const result = await process;
-    const value = await promise;
-    return result + value;
-  }, Promise.resolve(''));
+function queuePromises(promises) {
+  return promises.reduce(
+    async (process, promise) => {
+      const result = await process;
+      const value = await promise;
+      return result + value;
+    },
+    new Promise((resolve) => {
+      resolve('');
+    })
+  );
 }
 
 module.exports = {
@@ -158,5 +161,5 @@ module.exports = {
   getFirstPromiseResult,
   getAllOrNothing,
   getAllResult,
-  queuPromises,
+  queuePromises,
 };
